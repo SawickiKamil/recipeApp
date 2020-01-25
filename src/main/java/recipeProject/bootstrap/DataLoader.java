@@ -1,8 +1,10 @@
 package recipeProject.bootstrap;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import recipeProject.model.*;
 import recipeProject.repositories.CategoryRepository;
 import recipeProject.repositories.RecipeRepository;
@@ -11,6 +13,7 @@ import recipeProject.repositories.UnitOfMeasureRepository;
 import java.math.BigDecimal;
 import java.util.*;
 
+@Slf4j
 @Component
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -25,7 +28,9 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     @Override
+    @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        log.info("loading Bootstrap Data");
         recipeRepository.saveAll(getRecipes());
     }
 
