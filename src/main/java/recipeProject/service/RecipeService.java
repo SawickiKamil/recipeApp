@@ -1,6 +1,7 @@
 package recipeProject.service;
 
 import org.springframework.stereotype.Component;
+import recipeProject.command.RecipeCommand;
 import recipeProject.model.Recipe;
 
 import java.util.Set;
@@ -11,4 +12,6 @@ public interface RecipeService {
     Set<Recipe> getRecipes();
 
     Recipe findById(Long id);
+
+    RecipeCommand saveRecipeCommand(RecipeCommand command);
 }
