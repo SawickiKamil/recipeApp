@@ -8,4 +8,6 @@ import recipeProject.model.Ingredient;
 public interface IngredientService {
 
     IngredientsCommand findByRecipeIdAndId(Long recipeId, Long ingredientId);
+
+    IngredientsCommand saveIngredientCommand(IngredientsCommand command);
 }
