@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import recipeProject.command.IngredientsCommand;
+import recipeProject.command.RecipeCommand;
+import recipeProject.command.UnitOfMeasureCommand;
 import recipeProject.service.IngredientService;
 import recipeProject.service.RecipeService;
 import recipeProject.service.UnitOfMeasureService;
@@ -27,7 +29,9 @@ public class IngredientController {
     @GetMapping
     @RequestMapping("/recipe/{recipeId}/ingredients")
     public String listIngredients(@PathVariable String recipeId, Model model){
+        log.debug("Getting ingredient list for recipe id: " + recipeId);
 
+        // use command object to avoid lazy load errors in Thymeleaf.
         model.addAttribute("recipe", recipeService.findCommandById(Long.valueOf(recipeId)));
 
         return "recipe/ingredient/list";
@@ -41,14 +45,25 @@ public class IngredientController {
         return "recipe/ingredient/show";
     }
 
-    @PostMapping("recipe/{recipeId}/ingredient")
-    public String saveOrUpdate(@ModelAttribute IngredientsCommand command){
-        IngredientsCommand savedCommand = ingredientService.saveIngredientCommand(command);
+    @GetMapping
+    @RequestMapping("recipe/{recipeId}/ingredient/new")
+    public String newIngredient(@PathVariable String recipeId, Model model){
 
-        log.info("saved receipe id:" + savedCommand.getRecipeId());
-        log.info("saved ingredient id:" + savedCommand.getId());
+        //make sure we have a good id value
+        RecipeCommand recipeCommand = recipeService.findCommandById(Long.valueOf(recipeId));
+        //todo raise exception if null
 
-        return "redirect:/recipe/" + savedCommand.getRecipeId() + "/ingredient/" + savedCommand.getId() + "/show";
+        //need to return back parent id for hidden form property
+        IngredientsCommand ingredientCommand = new IngredientsCommand();
+        ingredientCommand.setRecipeId(Long.valueOf(recipeId));
+        model.addAttribute("ingredient", ingredientCommand);
+
+        //init uom
+        ingredientCommand.setUom(new UnitOfMeasureCommand());
+
+        model.addAttribute("uomList",  unitOfMeasureService.listAllUoms());
+
+        return "recipe/ingredient/ingredientform";
     }
 
     @GetMapping
@@ -59,5 +74,15 @@ public class IngredientController {
 
         model.addAttribute("uomList", unitOfMeasureService.listAllUoms());
         return "recipe/ingredient/ingredientform";
+    }
+
+    @PostMapping("recipe/{recipeId}/ingredient")
+    public String saveOrUpdate(@ModelAttribute IngredientsCommand command){
+        IngredientsCommand savedCommand = ingredientService.saveIngredientCommand(command);
+
+        log.debug("saved receipe id:" + savedCommand.getRecipeId());
+        log.debug("saved ingredient id:" + savedCommand.getId());
+
+        return "redirect:/recipe/" + savedCommand.getRecipeId() + "/ingredient/" + savedCommand.getId() + "/show";
     }
 }
